@@ -1,0 +1,107 @@
+{% include "header.html" %}
+
+<body style="background-color: #121212; margin: 0; height: 100vh; overflow: hidden;">
+  <div class="page-wrapper">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <h4 class="sidebar-title">Playlists</h4>
+        <form method="POST" action="{{ url_for('refresh_data') }}" id="refreshForm">
+          <button id="refreshButton" class="refresh-btn" title="Refresh playlists">
+            <i id="refreshIcon" class="fas fa-sync-alt"></i>
+          </button>
+        </form>
+      </div>
+      <ul class="playlist-list">
+        {% for name, details in playlists.items() %}
+          <li class="playlist-item">
+            <a href="{{ url_for('playlist_view', playlist_id=details.id) }}">{{ name }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <!-- Timeline Section -->
+    <div class="timeline-section fade-in">
+      <h2 class="playlist-title">{{ playlist_name }}</h2>
+
+      <div class="timeline-scroll-container">
+        <div id="timelineContent" class="timeline-content">
+          <div id="timelineGrid" class="timeline-grid">
+            {% for song in songs %}
+              <div class="song-row">
+                <div class="song-info">
+                  <div class="track-name">{{ song.track.split(' - ')[0] }}</div>
+                  <div class="track-artist">{{ song.track.split(' - ')[1] }}</div>
+                </div>
+                <div class="ticks">
+                  {% for tick in song.presence %}
+                    <div class="tick {% if tick.present %}active{% endif %}" title="{{ tick.date }}"></div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Floating Scrollbar -->
+        <div id="timelineScrollbar" class="timeline-wrapper">
+          <div id="timelineScrollbarInner" class="timeline-grid-scroll"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  // This one is only needed on playlist view page
+  const content = document.getElementById("timelineContent");
+  const timelineGrid = document.getElementById("timelineGrid");
+  const scrollbar = document.getElementById("timelineScrollbar");
+  const scrollbarInner = document.getElementById("timelineScrollbarInner");
+
+  function syncWidths() {
+    if (timelineGrid && scrollbarInner) {
+      scrollbarInner.style.width = timelineGrid.scrollWidth + "px";
+    }
+  }
+
+  function syncScroll() {
+    content.scrollLeft = scrollbar.scrollLeft;
+  }
+
+  function reverseSyncScroll() {
+    scrollbar.scrollLeft = content.scrollLeft;
+  }
+
+  if (content && scrollbar && scrollbarInner) {
+    syncWidths();
+    window.addEventListener("resize", syncWidths);
+    scrollbar.addEventListener("scroll", syncScroll);
+    content.addEventListener("scroll", reverseSyncScroll);
+  }
+</script>
+
+<script>
+  const refreshForm = document.getElementById("refreshForm");
+  const refreshButton = document.getElementById("refreshButton");
+  const refreshIcon = document.getElementById("refreshIcon");
+
+  if (refreshForm) {
+    refreshForm.addEventListener("submit", function(e) {
+      e.preventDefault(); // Stop the normal form submission
+
+      refreshButton.disabled = true;
+      refreshIcon.classList.remove("fa-sync-alt");
+      refreshIcon.classList.add("fa-spinner", "fa-spin");
+
+      // Now allow at least 300ms to show spinner properly
+      setTimeout(() => {
+        refreshForm.submit();
+      }, 300);
+    });
+  }
+</script>
+
+</body>

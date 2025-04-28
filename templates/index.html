@@ -1,0 +1,47 @@
+{% include "header.html" %}
+
+<body style="background-color: #121212; margin: 0; height: 100vh; overflow: hidden;">
+  <div class="page-wrapper">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <h4 class="sidebar-title">Playlists</h4>
+        <form method="POST" action="{{ url_for('refresh_data') }}" id="refreshForm">
+          <button id="refreshButton" class="refresh-btn" title="Refresh playlists">
+            <i id="refreshIcon" class="fas fa-sync-alt"></i>
+          </button>
+        </form>
+      </div>
+      <ul class="playlist-list">
+        {% for name, details in playlists.items() %}
+          <li class="playlist-item">
+            <a href="{{ url_for('playlist_view', playlist_id=details.id) }}">{{ name }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <!-- Right Content -->
+    <div class="timeline-section fade-in">
+      <h2 class="playlist-title">Welcome!</h2>
+      <p style="color: #bbb;">Select a playlist on the left to view the songs and timeline analysis.</p>
+    </div>
+
+  </div>
+
+<script>
+  const refreshForm = document.getElementById("refreshForm");
+  const refreshButton = document.getElementById("refreshButton");
+  const refreshIcon = document.getElementById("refreshIcon");
+
+  if (refreshForm) {
+    refreshForm.addEventListener("submit", function() {
+      refreshButton.disabled = true;
+      refreshIcon.classList.remove("fa-sync-alt");
+      refreshIcon.classList.add("fa-spinner", "fa-spin");
+    });
+  }
+</script>
+
+</body>
